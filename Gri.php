@@ -649,15 +649,19 @@ class Gri
                 if (!isset($val->attributes->domain_tld)) continue;
 
                 $name = $val->attributes->domain_tld;
+                $currency = 'TRY';
 
                 $registerAmount = number_format($val->attributes->register_amount, 2, '.', '');
                 $transferAmount = number_format($val->attributes->transfer_amount, 2, '.', '');
                 $renewAmount = number_format($val->attributes->renew_amount, 2, '.', '');
+                if( is_object($val) && isset($val->attributes) && isset($val->attributes->currency))
+                    $currency = $val->attributes->currency;
 
                 $result[$name] = [
                     'register' => $registerAmount,
                     'transfer' => $transferAmount,
-                    'renewal' => $renewAmount
+                    'renewal' => $renewAmount,
+                    'currency' => $currency
                 ];
             }
             $currentPage++;
@@ -756,15 +760,25 @@ class Gri
         if (!$prices) return false;
 
         Helper::Load(["Products", "Money"]);
+        $allSystemCurrencies = Money::getCurrencies($cost_cid);
+
+        $currenciesWithCode = [];
+        foreach ($allSystemCurrencies as $systemCurrency)
+        {
+            $currenciesWithCode[$systemCurrency['code']] = $systemCurrency['id'];
+        }
 
         $profit_rate = Config::get("options/domain-profit-rate");
-
         foreach ($prices as $name => $val) {
             $api_cost_prices = [
                 'register' => $val["register"],
                 'transfer' => $val["transfer"],
                 'renewal' => $val["renewal"],
             ];
+
+            if(!isset($currenciesWithCode[$val['currency']]))
+                continue;
+            $cost_cid = $currenciesWithCode[$val['currency']];
 
             $paperwork = 0;
             $epp_code = 1;
