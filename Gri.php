@@ -152,7 +152,7 @@ class Gri
                 if ($item)
                     $dnsArray[] = [
                         'ip' => '',
-                        'dns' => $item
+                        'name' => $item
                     ];
             }
             $api_params['contact'] = self::toGriWhois($whois['registrant']);
@@ -672,7 +672,6 @@ class Gri
     public function import_domain($data = [])
     {
         $config = $this->config;
-
         $imports = [];
 
         Helper::Load(["Orders", "Products", "Money"]);
@@ -736,7 +735,6 @@ class Gri
                 "options" => Utility::jencode($options),
                 "unread" => 1,
             ];
-
             $insert = Orders::insert($order_data);
             if (!$insert) continue;
             $imports[] = $order_data["name"] . " (#" . $insert . ")";
@@ -749,7 +747,6 @@ class Gri
                 'imported' => implode(", ", $imports),
             ]);
         }
-
         return $imports;
     }
 

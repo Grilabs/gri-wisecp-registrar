@@ -240,7 +240,7 @@ function Gri_open_tab(elem, tabName){
         </div>
 
         <script type="text/javascript">
-
+            var griRegistrarUserLink = "<?php echo Controllers::$init->AdminCRLink("users-2",['detail','%USER_ID%']); ?>"
             function Gri_import_handler(result){
                 if(result != ''){
                     var solve = getJson(result);
@@ -291,7 +291,15 @@ function Gri_open_tab(elem, tabName){
                         data: null,
                         render: function (data)
                         {
-                            return '<select class="width200 select-user" name="data['+ data.domain +'][user_id]"></select>'
+                            if(typeof data.user_data !== "object" || typeof data.user_data.id !== "number") {
+                                return '<select class="width200 select-user" name="data[' + data.domain + '][user_id]"></select>';
+                            } else
+                            {
+                                let user_link = griRegistrarUserLink.replace('%USER_ID%', data.user_data.id);
+                                return '<p><a href="'+user_link+'" target="_blank"><strong title="'+data.user_data.full_name+'">'+ data.user_data.full_name +'</strong></a>' +
+                                    (typeof data.user_data.company_name === "string" && data.user_data.company_name ? '<br><span class="mobcomname" title="'+ data.user_data.company_name +'">'+ data.user_data.company_name +'</span>' : "") +
+                                    '</p>'
+                            }
                         }
                     },
                     {
@@ -369,7 +377,7 @@ function Gri_open_tab(elem, tabName){
             <input type="hidden" name="module" value="Gri">
             <input type="hidden" name="controller" value="import">
 
-            <table width="100%" id="Gri_list_domains" class="table table-striped table-borderedx table-condensed nowrap">
+            <table width="100%" id="Gri_list_domains" class="table table-striped table-bordered table-condensed nowrap">
                 <thead style="background:#ebebeb;">
                 <tr>
                     <th align="center" data-orderable="false">#</th>
@@ -380,43 +388,6 @@ function Gri_open_tab(elem, tabName){
                 </tr>
                 </thead>
                 <tbody align="center" style="border-top:none;">
-                <?php
-                    $list   = $module->domains();
-                    $i = 0;
-                    if($list){
-                        foreach($list AS $row){
-                            $i++;
-                            ?>
-                            <tr<?php echo isset($row["order_id"]) && $row["order_id"] ? ' style="background: #c2edc2;opacity: 0.7;    filter: alpha(opacity=70);"' : ''; ?>>
-                                <td align="left"><?php echo $i; ?></td>
-                                <td align="left"><?php echo $row["domain"]; ?></td>
-                                <td align="center">
-                                    <?php
-                                        if(isset($row["user_data"]) && $row["user_data"]){
-                                            $user_link = Controllers::$init->AdminCRLink("users-2",['detail',$row["user_data"]["id"]]);
-                                            $user_name           = Utility::short_text($row["user_data"]["full_name"],0,21,true);
-                                            $user_company_name   = Utility::short_text($row["user_data"]["company_name"],0,21,true);
-
-                                            $user_detail         = '<a href="'.$user_link.'" target="_blank"><strong title="'.$row["user_data"]["full_name"].'">'.$user_name.'</strong></a><br><span class="mobcomname" title="'.$row["user_data"]["company_name"].'">'.$user_company_name.'</span>';
-                                            echo $user_detail;
-                                        }else{
-                                            ?>
-                                            <select class="width200 select-user" name="data[<?php echo $row["domain"]; ?>][user_id]"></select>
-                                            <?php
-                                        }
-                                    ?>
-                                </td>
-                                <td align="center">
-                                    <?php echo $row["creation_date"] ? DateManager::format("d/m/Y",$row["creation_date"]) : '-'; ?>
-                                </td>
-                                <td align="center">
-                                    <?php echo $row["end_date"] ? DateManager::format("d/m/Y",$row["end_date"]) : '-'; ?>
-                                </td>
-                            </tr>
-                            <?php
-                        }
-                    }
-                ?>
                 </tbody>
             </table>
 
