@@ -22,6 +22,12 @@ class Gri
         }
     }
 
+    private static function domainAvailableResultConvert($in)
+    {
+        if($in === 'not_available') return 'unavailable';
+        return $in;
+    }
+
     public function set_order($order = [])
     {
         $this->order = $order;
@@ -104,7 +110,7 @@ class Gri
         foreach ($checkApi->data as $item) {
             $fullDomain = $item->name;
             $tld = $allDomains[$fullDomain]['tld'];
-
+            $item->detail = self::domainAvailableResultConvert($item->detail);
             $result[$tld] = ['status' => $item->detail];
         }
 
