@@ -73,6 +73,16 @@ function Gri_open_tab(elem, tabName){
             </div>
 
             <div class="formcon">
+                <div class="yuzde30"><?php echo $LANG["fields"]["debug-mode"]; ?></div>
+                <div class="yuzde70">
+                    <input<?php echo $CONFIG["settings"]["debug-mode"] ? ' checked' : ''; ?> type="checkbox" name="debug-mode" value="1" id="Gri_debug-mode" class="checkbox-custom">
+                    <label class="checkbox-custom-label" for="Gri_debug-mode">
+                        <span class="kinfo"><?php echo $LANG["desc"]["debug-mode"]; ?></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="formcon">
                 <div class="yuzde30"><?php echo $LANG["fields"]["adp"]; ?></div>
                 <div class="yuzde70">
                     <input<?php echo $CONFIG["settings"]["adp"] ? ' checked' : ''; ?> type="checkbox" name="adp" value="1" id="Gri_adp" class="checkbox-custom">

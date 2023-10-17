@@ -9,6 +9,7 @@
     $api_client       = Filter::init("POST/api_client","hclear");
     $api_secret       = Filter::init("POST/api_secret","hclear");
     $test_mode      = (int) Filter::init("POST/test-mode","numbers");
+    $debug_mode      = (int) Filter::init("POST/debug-mode","numbers");
     $adp            = (bool) (int) Filter::init("POST/adp","numbers");
     $cost_cid       = (int) Filter::init("POST/cost-currency","numbers");
 
@@ -31,6 +32,9 @@
 
     if($test_mode != $config["settings"]["test-mode"])
         $sets["settings"]["test-mode"] = $test_mode;
+
+    if($debug_mode != $config["settings"]["debug-mode"])
+        $sets["settings"]["debug-mode"] = $debug_mode;
 
     if($adp != $config["settings"]["adp"])
         $sets["settings"]["adp"] = $adp;

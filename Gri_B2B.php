@@ -8,6 +8,7 @@ class griB2B
     const API_URL_SANDBOX = "https://b2b-api-test.gri.net";
     const API_URL_PROD = "https://b2b-prod-api.gri.net";
 
+    private string $debugFile;
     private string $apiUser;
     private string $apiPassword;
     private string $apiClientId;
@@ -30,6 +31,7 @@ class griB2B
         $this->apiClientSecret = $apiClientSecret;
 
         $custom_options_file = dirname(__FILE__) . '/custom_curl_options.json';
+        $this->debugFile = dirname(__FILE__) . '/debug.log';
 
         $custom_options = array();
         $this->test = $test_mode;
@@ -52,6 +54,13 @@ class griB2B
         }
 
         $this->init_curl();
+    }
+
+    public function writeLog($data)
+    {
+        if(is_array($data) || is_object($data))
+             $data = json_encode($data,JSON_PRETTY_PRINT);
+        file_put_contents($this->debugFile, $data, FILE_APPEND);
     }
 
     public function enableDebug()
@@ -78,19 +87,26 @@ class griB2B
         return $this->baseUrl;
     }
 
+
+    public static function isJson($string): bool
+    {
+        json_decode($string);
+
+        return (json_last_error() == JSON_ERROR_NONE);
+    }
+
     public function request($url = '', $params = array(), $method = 'POST')
     {
+        $headers = [];
+        $urlCompleted = $url;
+        $paramsCompleted = $params;
+        if ($method == 'GET' && !empty($params)) {
+            $urlCompleted .= '?' . http_build_query($params);
+            $paramsCompleted = array();
+        }
         try {
             if ($url !== '/oauth/v2/token') {
                 $t = $this->get_token();
-            }
-
-            $headers = [];
-            $urlCompleted = $url;
-            $paramsCompleted = $params;
-            if ($method == 'GET' && !empty($params)) {
-                $urlCompleted .= '?' . http_build_query($params);
-                $paramsCompleted = array();
             }
 
             if (!empty($paramsCompleted)) {
@@ -120,25 +136,29 @@ class griB2B
             $body = curl_exec($this->http_client);
 
             if($this->debugMode) {
-                // TODO: Debug
+                $this->writeLog([
+                    'requestUrl' => $this->getBaseUrl() . $urlCompleted,
+                    'headers' => $headers,
+                    'postBody' => $paramsCompleted,
+                    'response' => !self::isJson($body) ? $body : json_decode($body)
+                ]);
             }
         } catch (\Exception $exception) {
             $body = (object)[
                 'message' => $exception->getMessage(),
                 'status' => false
             ];
-        }
-
-        if (!function_exists('Gri\B2B\isJson')) {
-            function isJson($string)
-            {
-                json_decode($string);
-
-                return (json_last_error() == JSON_ERROR_NONE);
+            if($this->debugMode) {
+                $this->writeLog([
+                    'resultType' => 'exception',
+                    'requestUrl' => $this->getBaseUrl() . $urlCompleted,
+                    'postBody' => $paramsCompleted,
+                    'errorMsg' => $exception->getMessage()
+                ]);
             }
         }
 
-        $responseBody = isJson($body) ? json_decode($body) : $body;
+        $responseBody = self::isJson($body) ? json_decode($body) : $body;
         if (isset($responseBody->status) && !$responseBody->status) {
             $msg = "UNKNOWN MESSAGE";
             if (isset($responseBody->detail)) {

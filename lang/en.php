@@ -19,6 +19,7 @@ return [
         'api_client' => '',
         'api_secret' => '',
         'test-mode' => 'Activate to process in test mode.',
+        'debug-mode' => 'Activate to debug network process.',
         'adp' => 'It automatically pulls costs every day and defines the sales prices for the profit rate you specify.',
         'cost-currency' => '',
         'import-tld-1' => 'Automatically import all extensions registered on the API.',

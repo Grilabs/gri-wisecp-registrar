@@ -24,7 +24,7 @@ class Gri
 
     private static function domainAvailableResultConvert($in)
     {
-        if($in === 'not_available') return 'unavailable';
+        if ($in === 'not_available') return 'unavailable';
         return $in;
     }
 
@@ -57,10 +57,13 @@ class Gri
         $password = Crypt::decode($password, Config::get("crypt/system"));
         $api_secret = Crypt::decode($api_secret, Config::get("crypt/system"));
         $sandbox = (bool)$config['settings']["test-mode"];
+        $debug = (bool)$config['settings']["debug-mode"];
 
         $this->api_client = new griB2B(
             $username, $password, $api_client, $api_secret, $sandbox
         );
+        if ($debug) $this->api_client->enableDebug();
+
         return $this->api_client;
     }
 
@@ -98,6 +101,7 @@ class Gri
                 'domain' => $fullDomain
             ];
         }
+
         $checkApi = $this->getClient()->request('/api/v2/domains/check', ['domains' => array_map(function ($item) {
             return $item['domain'];
         }, $allDomains)]);
@@ -113,7 +117,6 @@ class Gri
             $item->detail = self::domainAvailableResultConvert($item->detail);
             $result[$tld] = ['status' => $item->detail];
         }
-
         return $result;
     }
 
@@ -519,14 +522,14 @@ class Gri
             return false;
         }
 
-        $start = DateManager::format("c", $details["registration_date"]);
-        $end = DateManager::format("c", $details["expiry_date"]);
-        $status = $details["status"];
+        $start = DateManager::format("c", $details->data->attributes->registration_date);
+        $end = DateManager::format("c", $details->data->attributes->expiry_date);
+        $status = $details->data->attributes->status;
 
         $return_data = [
             'creationtime' => $start,
             'endtime' => $end,
-            'status' => self::statusConvert($details->data->attributes->status),
+            'status' => self::statusConvert($status),
         ];
 
         if ($status == "active") {
@@ -660,7 +663,7 @@ class Gri
                 $registerAmount = number_format($val->attributes->register_amount, 2, '.', '');
                 $transferAmount = number_format($val->attributes->transfer_amount, 2, '.', '');
                 $renewAmount = number_format($val->attributes->renew_amount, 2, '.', '');
-                if( is_object($val) && isset($val->attributes) && isset($val->attributes->currency))
+                if (is_object($val) && isset($val->attributes) && isset($val->attributes->currency))
                     $currency = $val->attributes->currency;
 
                 $result[$name] = [
@@ -779,7 +782,7 @@ class Gri
                 'renewal' => $val["renewal"],
             ];
 
-            if(!isset($currenciesWithCode[$val['currency']]))
+            if (!isset($currenciesWithCode[$val['currency']]))
                 continue;
             $cost_cid = $currenciesWithCode[$val['currency']];
 

@@ -13,6 +13,7 @@ return [
         'api_client' => '',
         'api_secret' => '',
         'test-mode' => 0,
+        'debug-mode' => 0,
         'adp' => false,
         'cost-currency' => 4,
     ]
