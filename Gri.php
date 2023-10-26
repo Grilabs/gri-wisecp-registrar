@@ -489,7 +489,7 @@ class Gri
         }
     }
 
-    public static function statusConvert($status)
+    public static function statusConvert($status): string
     {
         $wiseStatus = 'unknown';
         switch ($status) {
@@ -497,6 +497,8 @@ class Gri
                 $wiseStatus = 'active';
                 break;
             case 'expired':
+            case 'grace':
+            case 'recoverable':
                 $wiseStatus = 'expired';
                 break;
             case 'incoming_transfer':
@@ -526,18 +528,11 @@ class Gri
         $end = DateManager::format("c", $details->data->attributes->expiry_date);
         $status = $details->data->attributes->status;
 
-        $return_data = [
+        return [
             'creationtime' => $start,
             'endtime' => $end,
             'status' => self::statusConvert($status),
         ];
-
-        if ($status == "active") {
-            $return_data["status"] = "active";
-        } elseif ($status == "expired")
-            $return_data["status"] = "expired";
-
-        return $return_data;
     }
 
     public function transfer_sync($params = [])
