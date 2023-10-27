@@ -498,7 +498,7 @@ class Gri
                 break;
             case 'expired':
             case 'grace':
-            case 'recoverable':
+            case 'redemption':
                 $wiseStatus = 'expired';
                 break;
             case 'incoming_transfer':
